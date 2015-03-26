@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>revisiting pixels to penguins</title>
+    <style type="text/css">
+      body {
+      font-family: sans-serif;
+      }
+      table {
+      font-family: monospace;
+      font-size: 10px;
+      float: left;
+      border-spacing: 10px;
+      border-collapse: collapse;
+      }
+      td {
+      padding: 0px;
+      visibility: hidden;
+      }
+    </style>
+
+    <script type="text/javascript" src="tux.js"></script>
+    <script type="text/javascript" src="pixels.js"></script>
+  </head>
+  <body>
+    <div id="squaak"></div>
+    <div align="left">
+      <h1>Squaak?!</h1>
+      <p>
+        This is a rehash of <a href="http://gweep.net/~aron/">my</a>
+        first-prize-winning from the
+        2007 <a href="http://barcamp.org/w/page/400495/BarCampBoston2">BarcampBoston2</a>
+        programming contest.
+      </p>
+      <p>
+        The original version was a <a href="http://rubyonrails.org">Ruby on
+        Rails</a> application. The ASCII Tux-to-HTML rendering happened in
+        Ruby. The audio was written
+        using <a href="https://github.com/jimm/midilib">midilib</a> to a MIDI
+        file in a known location on disk which was played through
+        a <code>&lt;object&gt;</code> tag.
+      </p>
+      <p>
+        The ASCII <a href="http://en.wikipedia.org/wiki/Tux">Tux</a> was
+        generated with an image-to-ASCII converter and then cleaned up a bit
+        by hand (exactly how is lost; maybe
+        with <a href="https://csl.name/jp2a/">jp2a</a>).
+      </p>
+      <p>
+        That version did not render ASCII characters but used
+        the <a href="https://www.flickr.com/services/api/">Flickr search
+        API</a> to find a set of images matching some user-provided search
+        term. Data from the image URLs was distilled into a stream of notes
+        for the MIDI file.
+      </p>
+      <p>
+        This all worked great during the programming contest demo, but the
+        MIDI file never felt right. All user searches would read and write to
+        the same MIDI file, meaning Alice might play Bob's audio.
+        We <em>MUST</em> make sure that every user receives the proper random
+        audio!
+      </p>
+      <p>
+        This version has no server-side component and is just an HTML page and
+        a bit of Javascript. It uses
+        the <a href="http://webaudio.github.io/web-audio-api/">Web Audio
+        API</a> to generate audio within the browser.
+      </p>
+      <p>
+        It's not as pretty without all the Flickr images, but at least we have
+        colored ASCII text, right?
+      </p>
+    </div>
+    <script type="text/javascript">
+      squaak();
+    </script>
+  </body>
+</html>
+  
