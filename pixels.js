@@ -15,7 +15,6 @@ function squaak() {
     osc.connect(audio.destination);
 
   } catch (err) {
-    alert("Try another browser Firefox or Chrome for sound.");
     console.log('audio error',err);
   }
 
