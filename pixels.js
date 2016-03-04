@@ -1,4 +1,4 @@
-function squaak() {
+function pixels(id, data) {
   var space = 5;
   var audio;
   var osc;
@@ -16,10 +16,11 @@ function squaak() {
 
   } catch (err) {
     console.log('audio error',err);
+    return;
   }
 
-  var width = Math.max.apply(null, tux.map( function(s) { return s.length; } ));
-  var remaining = tux.length * width;
+  var width = Math.max.apply(null, data.map( function(s) { return s.length; } ));
+  var remaining = data.length * width;
   var coords = [];
 
   function coord_to_id(x,y) {
@@ -41,8 +42,8 @@ function squaak() {
     return '<tr>' + cells.join('') + '</tr>'
   }
 
-  function tux_to_table() {
-    var rows = tux.map(pad_lines).map(line_to_row);
+  function data_to_table() {
+    var rows = data.map(pad_lines).map(line_to_row);
 
     return '<table>\n' + rows.join('\n') + '</table>';
   }
@@ -90,17 +91,17 @@ function squaak() {
       setTimeout(appear, space);
     } else {
       if (osc) { osc.stop(0); }
-      console.log('squaak!');
+      console.log('done!');
     }
   }
 
-  for (var i=0; i<tux.length; i++) {
+  for (var i=0; i<data.length; i++) {
     for (var j=0; j<width; j++) {
       coords.push({ x: j, y: i});
     }
   }
 
-  document.getElementById('squaak').innerHTML = tux_to_table();
+  document.getElementById(id).innerHTML = data_to_table();
 
   if (osc) {
     osc.start(0);
