@@ -1,23 +1,5 @@
 function pixels(id, data) {
   var space = 5;
-  var audio;
-  var osc;
-  try {
-    if ("AudioContext" in window) {
-      audio = new AudioContext();
-    } else if ("webkitAudioContext" in window) {
-      audio = new webkitAudioContext();
-    } else {
-      throw new Error("no audio context");
-    }
-
-    osc = audio.createOscillator();
-    osc.connect(audio.destination);
-  } catch (err) {
-    console.log("audio error", err);
-    return;
-  }
-
   var width = Math.max.apply(
     null,
     data.map(function(s) {
@@ -52,53 +34,82 @@ function pixels(id, data) {
     return "<table>\n" + rows.join("\n") + "</table>";
   }
 
-  function play(x, y, s) {
-    if (osc) {
-      if (s != " ") {
-        var c = s.charCodeAt(0);
-        // http://en.wikipedia.org/wiki/Piano_key_frequencies
-        var key = c % 88; // 88 keys.
-        var note = Math.pow(2, (key - 49) / 12) * 440;
-
-        // console.log('char:',s,'note:',note);
-        osc.frequency.value = note;
+  function pixelize() {
+    // Chrome (and other browsers?) require that audio must start after user
+    // action, not on page load.
+    var audio;
+    var osc;
+    try {
+      if ("AudioContext" in window) {
+        audio = new AudioContext();
+      } else if ("webkitAudioContext" in window) {
+        audio = new webkitAudioContext();
+      } else {
+        throw new Error("no audio context");
       }
-    }
-  }
 
-  function colorize() {
-    function clr() {
-      var n = Math.round(255 * Math.random());
-      var c = n.toString(16);
-      if (c.length == 1) {
-        c = "0" + c;
+      if (audio) {
+        osc = audio.createOscillator();
+        osc.connect(audio.destination);
+      } else {
+        throw new Error("no audio object");
       }
-      return c;
+    } catch (err) {
+      console.log("audio error", err);
     }
-    return "#" + clr() + clr() + clr();
-  }
 
-  function toggle(x, y) {
-    var id = coord_to_id(x, y);
-    var e = document.getElementById(id);
-    play(x, y, e.innerHTML);
-    e.style.visibility = "visible";
-    e.style.color = colorize();
-  }
-
-  function appear() {
-    if (coords.length > 0) {
-      var i = Math.round((coords.length - 1) * Math.random());
-      var coord = coords[i];
-      coords.splice(i, 1);
-      toggle(coord.x, coord.y);
-      setTimeout(appear, space);
-    } else {
+    function play(x, y, s) {
       if (osc) {
-        osc.stop(0);
+        if (s != " ") {
+          var c = s.charCodeAt(0);
+          // http://en.wikipedia.org/wiki/Piano_key_frequencies
+          var key = c % 88; // 88 keys.
+          var note = Math.pow(2, (key - 49) / 12) * 440;
+
+          // console.log('char:',s,'note:',note);
+          osc.frequency.value = note;
+        }
       }
-      console.log("done!");
     }
+
+    function colorize() {
+      function clr() {
+        var n = Math.round(255 * Math.random());
+        var c = n.toString(16);
+        if (c.length == 1) {
+          c = "0" + c;
+        }
+        return c;
+      }
+      return "#" + clr() + clr() + clr();
+    }
+
+    function toggle(x, y) {
+      var id = coord_to_id(x, y);
+      var e = document.getElementById(id);
+      play(x, y, e.innerHTML);
+      e.style.visibility = "visible";
+      e.style.color = colorize();
+    }
+
+    function appear() {
+      if (coords.length > 0) {
+        var i = Math.round((coords.length - 1) * Math.random());
+        var coord = coords[i];
+        coords.splice(i, 1);
+        toggle(coord.x, coord.y);
+        setTimeout(appear, space);
+      } else {
+        if (osc) {
+          osc.stop(0);
+        }
+        console.log("done!");
+      }
+    }
+    if (osc) {
+      osc.start(0);
+    }
+    setTimeout(appear, space);
   }
 
   for (var i = 0; i < data.length; i++) {
@@ -107,10 +118,18 @@ function pixels(id, data) {
     }
   }
 
-  document.getElementById(id).innerHTML = data_to_table();
-
-  if (osc) {
-    osc.start(0);
+  function initialize() {
+    document.getElementById(id).innerHTML = data_to_table();
   }
-  setTimeout(appear, space);
+
+  return {
+    initialize: initialize,
+    pixelize: function() {
+      // re-initialize in case this is a repeat click.
+      // no protection from concurrent execution.
+      // audio might repeatedly initialize.
+      initialize();
+      pixelize();
+    }
+  };
 }
